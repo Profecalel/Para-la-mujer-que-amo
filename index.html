@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Un lirio para ti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Caveat:wght@500;600;700&family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --purple-deep:#4a1e6b;
+    --purple-mid:#8a3fb0;
+    --pink-hot:#ef5fa7;
+    --pink-light:#ffb0d6;
+    --paper:#fff8f0;
+    --stem-green:#4f7a52;
+    --gold:#ffd76b;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0;
+    padding:0;
+    height:100%;
+    overflow:hidden;
+    font-family:'Quicksand', sans-serif;
+  }
+
+  body{
+    position:relative;
+    background: linear-gradient(120deg, var(--purple-deep), var(--purple-mid), var(--pink-hot), var(--pink-light), var(--purple-mid));
+    background-size: 400% 400%;
+    animation: flowBg 18s ease-in-out infinite;
+  }
+
+  @keyframes flowBg{
+    0%{ background-position: 0% 50%; }
+    50%{ background-position: 100% 50%; }
+    100%{ background-position: 0% 50%; }
+  }
+
+  /* --- blobs de luz que se mueven, dan textura y movimiento extra --- */
+  .blob{
+    position:absolute;
+    border-radius:50%;
+    filter: blur(60px);
+    opacity:0.55;
+    mix-blend-mode: screen;
+    pointer-events:none;
+  }
+  .blob1{
+    width:45vmax; height:45vmax;
+    background: radial-gradient(circle, var(--pink-hot), transparent 70%);
+    top:-15%; left:-10%;
+    animation: drift1 22s ease-in-out infinite;
+  }
+  .blob2{
+    width:38vmax; height:38vmax;
+    background: radial-gradient(circle, var(--purple-mid), transparent 70%);
+    bottom:-15%; right:-10%;
+    animation: drift2 26s ease-in-out infinite;
+  }
+  .blob3{
+    width:30vmax; height:30vmax;
+    background: radial-gradient(circle, var(--pink-light), transparent 70%);
+    top:35%; left:60%;
+    animation: drift3 20s ease-in-out infinite;
+  }
+  @keyframes drift1{
+    0%,100%{ transform: translate(0,0) scale(1); }
+    50%{ transform: translate(10vw, 8vh) scale(1.15); }
+  }
+  @keyframes drift2{
+    0%,100%{ transform: translate(0,0) scale(1); }
+    50%{ transform: translate(-8vw, -10vh) scale(1.1); }
+  }
+  @keyframes drift3{
+    0%,100%{ transform: translate(0,0) scale(1); }
+    50%{ transform: translate(-12vw, 6vh) scale(0.9); }
+  }
+
+  /* --- estrellas cayendo --- */
+  .stars-layer{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:2;
+  }
+  .star{
+    position:absolute;
+    top:-8%;
+    filter: drop-shadow(0 0 3px rgba(255,255,255,0.4));
+    animation-name: fall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    will-change: transform;
+  }
+  @keyframes fall{
+    from{ transform: translateY(0) rotate(0deg); opacity:0.75; }
+    to{ transform: translateY(115vh) rotate(180deg); opacity:0.45; }
+  }
+
+  /* --- escena central --- */
+  .scene{
+    position:relative;
+    z-index:3;
+    height:100%;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+  }
+
+  .hint{
+    font-family:'Playfair Display', serif;
+    font-style:italic;
+    color: var(--paper);
+    font-size: 1.05rem;
+    letter-spacing:0.04em;
+    margin-bottom: 28px;
+    opacity:0.9;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    transition: opacity 0.6s ease;
+  }
+  .hint.hidden{ opacity:0; }
+
+  .lily-wrap{
+    position:relative;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    height: 220px;
+  }
+
+  .lily-group{
+    cursor:pointer;
+    transform-origin: 50% 100%;
+    transition: transform 1.3s cubic-bezier(.34,1.56,.64,1), filter 1.3s ease;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35));
+  }
+  .lily-group:hover{
+    filter: drop-shadow(0 8px 30px rgba(255,255,255,0.35));
+  }
+  .lily-group.grown{
+    transform: scale(2.6);
+  }
+
+  .lily-group.grown:hover{
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35));
+  }
+
+  /* --- nota --- */
+  .note{
+    position:absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translate(-50%, 20px) scale(0.85);
+    width: 260px;
+    background: var(--paper);
+    border-radius: 6px;
+    padding: 18px 20px 16px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.03);
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(.34,1.56,.64,1);
+  }
+  .note::before{
+    content:"";
+    position:absolute;
+    top:-9px;
+    left:50%;
+    transform: translateX(-50%) rotate(45deg);
+    width:16px; height:16px;
+    background: var(--paper);
+  }
+  .note.show{
+    opacity:1;
+    pointer-events:auto;
+    transform: translate(-50%, 210px) scale(1);
+  }
+  .note textarea{
+    width:100%;
+    min-height: 90px;
+    border:none;
+    resize:none;
+    outline:none;
+    background:transparent;
+    font-family:'Caveat', cursive;
+    font-size:1.5rem;
+    line-height:1.35;
+    color:#4a2e3a;
+  }
+  .note textarea::placeholder{
+    color:#b79aa6;
+    font-family:'Caveat', cursive;
+  }
+  .note-label{
+    font-family:'Playfair Display', serif;
+    font-size:0.7rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:#c98bb0;
+    margin-bottom:6px;
+    display:block;
+  }
+
+  @media (max-width: 480px){
+    .note{ width: 210px; }
+    .hint{ font-size:0.92rem; padding:0 24px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    body, .blob, .star{ animation: none !important; }
+    .lily-group{ transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+
+  <div class="stars-layer" id="starsLayer"></div>
+
+  <div class="scene">
+    <div class="hint" id="hint">toca el tulipán, niña linda</div>
+
+    <div class="lily-wrap">
+      <svg class="lily-group" id="lily" width="120" height="200" viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- tallo -->
+        <path d="M60 200 C 58 150, 62 110, 60 88" stroke="var(--stem-green)" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <!-- hojas -->
+        <path d="M60 155 C 38 150, 24 134, 26 116 C 46 122, 58 136, 60 155 Z" fill="var(--stem-green)"/>
+        <path d="M60 170 C 82 163, 96 146, 94 130 C 74 137, 62 152, 60 170 Z" fill="var(--stem-green)"/>
+
+        <!-- flor: tulipán en forma de copa -->
+        <g transform="translate(60,86)">
+          <!-- petalo trasero izquierdo -->
+          <path d="M0 4 C -20 0, -26 -30, -14 -52 C -10 -34, -6 -14, 0 4 Z" fill="var(--pink-hot)"/>
+          <!-- petalo trasero derecho -->
+          <path d="M0 4 C 20 0, 26 -30, 14 -52 C 10 -34, 6 -14, 0 4 Z" fill="var(--pink-hot)"/>
+          <!-- petalo central -->
+          <path d="M0 6 C -12 0, -16 -34, 0 -58 C 16 -34, 12 0, 0 6 Z" fill="var(--pink-hot)"/>
+          <!-- petalo frontal izquierdo -->
+          <path d="M0 8 C -16 6, -22 -18, -10 -40 C -8 -24, -4 -6, 0 8 Z" fill="var(--pink-hot)"/>
+          <!-- petalo frontal derecho -->
+          <path d="M0 8 C 16 6, 22 -18, 10 -40 C 8 -24, 4 -6, 0 8 Z" fill="var(--pink-hot)"/>
+          <!-- base de la copa -->
+          <path d="M-9 4 C -6 12, 6 12, 9 4 C 6 8, -6 8, -9 4 Z" fill="var(--gold)" opacity="0.85"/>
+        </g>
+      </svg>
+
+      <div class="note" id="note">
+        <span class="note-label">Para ti</span>
+        <textarea id="noteText" placeholder="Te amo un montón, mi niña preciosa. Quiero hablar contigo mañana, mi amor, cuando tengas tiempo libre, porque sé que empezarás a estudiar, mi amor. Te amo con toda mi alma, muero y vivo de amor por ti, nena, MUA :3 me encanta tu voz, me gusta mucho"></textarea>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ---- estrellas cayendo ----
+  const starsLayer = document.getElementById('starsLayer');
+  const starEmojis = ['⭐'];
+  const STAR_COUNT = 30;
+
+  for(let i=0; i<STAR_COUNT; i++){
+    const s = document.createElement('span');
+    s.className = 'star';
+    s.textContent = starEmojis[Math.floor(Math.random()*starEmojis.length)];
+    const size = 10 + Math.random()*12;
+    const left = Math.random()*100;
+    const duration = 6 + Math.random()*10;
+    const delay = -Math.random()*16;
+    s.style.left = left + 'vw';
+    s.style.fontSize = size + 'px';
+    s.style.animationDuration = duration + 's';
+    s.style.animationDelay = delay + 's';
+    starsLayer.appendChild(s);
+  }
+
+  // ---- tulipán interactivo ----
+  const lily = document.getElementById('lily');
+  const note = document.getElementById('note');
+  const hint = document.getElementById('hint');
+  const noteText = document.getElementById('noteText');
+  let grown = false;
+
+  lily.addEventListener('click', () => {
+    grown = !grown;
+    lily.classList.toggle('grown', grown);
+    hint.classList.toggle('hidden', grown);
+
+    if(grown){
+      setTimeout(() => {
+        note.classList.add('show');
+        noteText.focus();
+      }, 500);
+    } else {
+      note.classList.remove('show');
+    }
+  });
+
+  // evita que escribir en la nota cierre la flor
+  note.addEventListener('click', (e) => e.stopPropagation());
+</script>
+
+</body>
+</html>
